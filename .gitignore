@@ -1,4 +1,5 @@
 .vscode
 __pycache__
 myvenv
-database.py
+database
+models/__pycache__
