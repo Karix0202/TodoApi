@@ -1,6 +1,3 @@
-"# TodoApi"
-<p>To use sqlite3 in this project you have to create file "database.py" with to constants:</p>
-<ol>
-    <li>SECRET_KEY - secret key to your db</li>
-    <li>DB_URI - path to your db</li>  
-</ol>
+<h1>TodoApi</h1>
+<p>To connect to your MySql db make dir "database" with file "config.py".</p>
+<p>File has to have one const <code>DB_URI</code> which is simple connection to MySql db</p>
