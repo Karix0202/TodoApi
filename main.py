@@ -24,6 +24,33 @@ class User(db.Model):
     password = db.Column(db.String(80))
     admin = db.Column(db.Boolean)
 
+class FriendRequest(db.Model):
+    __tablename__ = 'friend_requests'
+    id = db.Column(db.Integer, primary_key=True)
+    sender = db.Column(db.String(50), unique=True)
+    receiver = db.Column(db.String(50), unique=True)
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+
+        if not token:
+            return jsonify({'message' : 'Token is missing!'}), 401
+
+        try: 
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            current_user = User.query.filter_by(public_id=data['public_id']).first()
+        except:
+            return jsonify({'message' : 'Token is invalid!'}), 401
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated
+
 @app.route('/register', methods = ['POST'])
 def register():
     data = request.get_json()
@@ -59,6 +86,18 @@ def login():
         return jsonify({'token' : token.decode('UTF-8')})
 
     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+
+@app.route('/user', methods = ['GET'])
+@token_required
+def get_current_user_info(current_user):
+    user_data = {
+        'public_id': current_user.public_id,
+        'name': current_user.name,
+        'admin': current_user.admin,
+    }
+
+    return jsonify(user_data)
+
 
 @app.route('/')
 def index():
